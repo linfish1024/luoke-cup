@@ -776,6 +776,12 @@ const finishMatch = () => {
   state.history.unshift(match);
   if (state.history.length > 50) state.history = state.history.slice(0, 50);
   save();
+  // Tournament 模式：自动加下一场
+  if (state.tournament.round > 0) {
+    state.tournament.results.push(match);
+    state.tournament.round++;
+    save();
+  }
   state.view = 'gameover';
   state.lastMatch = match;
   render();
@@ -971,28 +977,6 @@ const renderTournament = (app) => {
 const countWinsTournament = () => state.tournament.results.filter(r => r.result === 'W').length;
 const countDrawsTournament = () => state.tournament.results.filter(r => r.result === 'D').length;
 const countLossesTournament = () => state.tournament.results.filter(r => r.result === 'L').length;
-
-// 比赛结束后，tournament 模式继续选下一对手
-const originalFinishMatch = finishMatch;
-const finishMatchWithTournament = () => {
-  originalFinishMatch();
-  if (state.tournament.round > 0) {
-    const g = state.game;
-    const m = state.lastMatch;
-    state.tournament.results.push(m);
-    state.tournament.round++;
-    if (state.tournament.round <= 8 && state.tournament.teams.length > state.tournament.round) {
-      // AI 选下一对手（ELO 相近的）
-      const candidates = state.tournament.teams.slice(state.tournament.round);
-      state.opponent = candidates[Math.floor(Math.random() * candidates.length)];
-    } else {
-      // 赛事结束
-    }
-    save();
-  }
-};
-// 覆盖 finishMatch
-finishMatch = finishMatchWithTournament;
 
 // === 历史 ===
 const renderHistory = (app) => {
