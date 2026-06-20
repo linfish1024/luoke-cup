@@ -339,6 +339,7 @@ const startQuickMatch = () => {
       }
     }, 1500);
     gameLoop = requestAnimationFrame(loop);
+    startLoop();
   }, 100);
 };
 
@@ -666,6 +667,7 @@ const checkGoal = () => {
 };
 
 let lastTime = 0;
+let gameInterval = null;
 const loop = (t) => {
   if (!state.game) return;
   const dt = Math.min(0.05, (t - lastTime) / 1000 || 0.016);
@@ -674,9 +676,25 @@ const loop = (t) => {
   draw();
   if (state.game.phase === 'ended') {
     cancelAnimationFrame(gameLoop);
+    if (gameInterval) { clearInterval(gameInterval); gameInterval = null; }
     return;
   }
-  gameLoop = requestAnimationFrame(loop);
+};
+
+const startLoop = () => {
+  if (gameLoop) cancelAnimationFrame(gameLoop);
+  if (gameInterval) clearInterval(gameInterval);
+  lastTime = performance.now();
+  // 兠底：用 setInterval 代替 RAF（headless/后台 tab 不卡）
+  gameInterval = setInterval(() => {
+    if (!state.game) return;
+    const now = performance.now();
+    const dt = Math.min(0.05, (now - lastTime) / 1000);
+    lastTime = now;
+    update(dt);
+    draw();
+  }, 16);
+  gameLoop = requestAnimationFrame((t) => { lastTime = t; loop(t); });
 };
 
 const draw = () => {
@@ -916,15 +934,13 @@ const renderTournament = (app) => {
     }));
     $('#startTour').addEventListener('click', () => {
       if (!state.tournament.myTeam) return;
-      state.tournament.teams = Object.keys(TEAMS).filter(id => id !== state.tournament.myTeam);
-      // 选 7 个对手
-      while (state.tournament.teams.length > 7) state.tournament.teams.pop();
-      state.tournament.teams.unshift(state.tournament.myTeam);
+      const all = Object.keys(TEAMS).filter(id => id !== state.tournament.myTeam);
+      // 随机选 7 个对手
+      const shuffled = all.sort(() => Math.random() - 0.5).slice(0, 7);
+      state.tournament.teams = [state.tournament.myTeam, ...shuffled];
       state.tournament.round = 1;
       state.tournament.results = [];
-      // 选下一对手
-      const idx = 1;
-      state.opponent = state.tournament.teams[idx];
+      state.opponent = shuffled[0];
       save();
       startQuickMatch();
     });
@@ -965,7 +981,19 @@ const renderTournament = (app) => {
         <button class="btn btn-blue" id="goHome">← 主页</button>
       </div>
     `;
-    if ($('#nextMatch')) $('#nextMatch').addEventListener('click', startQuickMatch);
+    if ($('#nextMatch')) $('#nextMatch').addEventListener('click', () => {
+      const teams = state.tournament.teams;
+      const idx = state.tournament.round;
+      if (idx < teams.length) {
+        state.opponent = teams[idx];
+      } else {
+        // 随机补充
+        const remaining = Object.keys(TEAMS).filter(id => id !== state.tournament.myTeam);
+        state.opponent = remaining[Math.floor(Math.random() * remaining.length)];
+      }
+      save();
+      startQuickMatch();
+    });
     if ($('#resetTour')) $('#resetTour').addEventListener('click', () => {
       state.tournament = {teams:null,round:0,bracket:null,results:[],myTeam:null};
       save();
