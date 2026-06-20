@@ -324,6 +324,20 @@ const startQuickMatch = () => {
     initJoystick();
     initActions();
     if (gameLoop) cancelAnimationFrame(gameLoop);
+    lastTime = 0;
+    // 第一次自动开球（我方开球）
+    setTimeout(() => {
+      if (state.game && state.game.phase === 'kickoff') {
+        // 我方中圈开球
+        const myGK = state.game.players.find(p => p.team === 0 && p.role === 'MID');
+        if (myGK) {
+          state.game.ball.owner = myGK;
+          state.game.ball.ownerTeam = 0;
+        }
+        state.game.phase = 'playing';
+        showMsg('开球！');
+      }
+    }, 1500);
     gameLoop = requestAnimationFrame(loop);
   }, 100);
 };
