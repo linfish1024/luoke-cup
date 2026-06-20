@@ -1,0 +1,1077 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+<meta name="theme-color" content="#0F9D58" />
+<title>洛可杯 2026 ⚽ 世界杯预测游戏</title>
+<style>
+  :root {
+    --green: #0F9D58;
+    --green-dark: #0a7042;
+    --green-light: #d6f0e1;
+    --gold: #FFD700;
+    --gold-dark: #d4a800;
+    --red: #D32F2F;
+    --bg: #f4f7f4;
+    --card: #ffffff;
+    --text: #1a1a1a;
+    --text-light: #666;
+    --border: #e0e0e0;
+    --shadow: 0 4px 12px rgba(0,0,0,0.08);
+  }
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  body {
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", sans-serif;
+    background: linear-gradient(135deg, #e8f5e9 0%, #fff 50%, #e8f5e9 100%);
+    color: var(--text);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+  .app { max-width: 480px; margin: 0 auto; padding: 16px; }
+  /* Header */
+  .header {
+    text-align: center;
+    padding: 24px 8px 16px;
+    position: relative;
+  }
+  .trophy { font-size: 56px; display: block; margin-bottom: 4px; }
+  h1 {
+    font-size: 28px;
+    margin: 0 0 4px;
+    color: var(--green-dark);
+    font-weight: 800;
+    letter-spacing: -0.5px;
+  }
+  .subtitle { color: var(--text-light); font-size: 13px; }
+  /* Cards */
+  .card {
+    background: var(--card);
+    border-radius: 16px;
+    padding: 18px;
+    box-shadow: var(--shadow);
+    margin-bottom: 16px;
+  }
+  .card-title {
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--green-dark);
+    margin: 0 0 12px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  /* Buttons */
+  .btn {
+    background: var(--green);
+    color: white;
+    border: none;
+    padding: 14px 20px;
+    border-radius: 12px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    width: 100%;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+  }
+  .btn:active { transform: scale(0.97); background: var(--green-dark); }
+  .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+  .btn-gold { background: linear-gradient(135deg, #FFD700 0%, #FFA000 100%); color: #4a3000; }
+  .btn-gold:active { background: linear-gradient(135deg, #FFA000 0%, #FF8F00 100%); }
+  .btn-outline {
+    background: white;
+    color: var(--green-dark);
+    border: 2px solid var(--green);
+  }
+  .btn-outline:active { background: var(--green-light); }
+  .btn-sm { padding: 10px 14px; font-size: 14px; width: auto; }
+  .btn-row { display: flex; gap: 8px; margin-top: 8px; }
+  .btn-row .btn { flex: 1; }
+  /* Input */
+  input[type="text"] {
+    width: 100%;
+    padding: 12px 14px;
+    border: 2px solid var(--border);
+    border-radius: 10px;
+    font-size: 16px;
+    transition: border-color 0.2s;
+  }
+  input[type="text"]:focus { outline: none; border-color: var(--green); }
+  /* Mode cards */
+  .mode-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .mode-card {
+    background: linear-gradient(135deg, #fff 0%, #f9fff9 100%);
+    border: 2px solid var(--border);
+    border-radius: 14px;
+    padding: 16px 10px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .mode-card:active { transform: scale(0.97); }
+  .mode-card.active { border-color: var(--green); background: var(--green-light); }
+  .mode-emoji { font-size: 36px; display: block; margin-bottom: 6px; }
+  .mode-name { font-weight: 700; font-size: 14px; color: var(--green-dark); }
+  .mode-desc { font-size: 11px; color: var(--text-light); margin-top: 2px; }
+  /* Group stage */
+  .group-section { margin-bottom: 18px; }
+  .group-header {
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--gold-dark);
+    margin: 0 0 8px;
+    padding-left: 6px;
+    border-left: 4px solid var(--gold);
+  }
+  .team-row {
+    display: flex;
+    align-items: center;
+    padding: 10px 12px;
+    background: #fafafa;
+    border-radius: 10px;
+    margin-bottom: 6px;
+    cursor: pointer;
+    border: 2px solid transparent;
+    transition: all 0.15s;
+  }
+  .team-row:active { transform: scale(0.98); }
+  .team-row.selected { background: var(--green-light); border-color: var(--green); }
+  .team-row.runner-up { background: #f5f5f5; border-color: #bdbdbd; }
+  .team-flag { font-size: 28px; margin-right: 10px; }
+  .team-info { flex: 1; }
+  .team-name { font-weight: 600; font-size: 15px; }
+  .team-meta { font-size: 11px; color: var(--text-light); }
+  .team-rank { font-size: 11px; color: var(--gold-dark); font-weight: 700; }
+  .position-tag {
+    font-size: 10px;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-weight: 700;
+    margin-left: 6px;
+  }
+  .tag-1st { background: var(--gold); color: #4a3000; }
+  .tag-2nd { background: #bdbdbd; color: #333; }
+  /* Progress */
+  .progress-wrap {
+    background: var(--card);
+    border-radius: 12px;
+    padding: 10px 14px;
+    margin-bottom: 12px;
+    box-shadow: var(--shadow);
+    position: sticky;
+    top: 8px;
+    z-index: 10;
+  }
+  .progress-text { font-size: 12px; color: var(--text-light); margin-bottom: 4px; }
+  .progress-bar {
+    background: #e0e0e0;
+    height: 6px;
+    border-radius: 3px;
+    overflow: hidden;
+  }
+  .progress-fill {
+    background: linear-gradient(90deg, var(--green) 0%, var(--gold) 100%);
+    height: 100%;
+    width: 0%;
+    transition: width 0.3s;
+  }
+  /* Result */
+  .result-card {
+    background: linear-gradient(135deg, #FFD700 0%, #FFA000 100%);
+    border-radius: 16px;
+    padding: 20px;
+    text-align: center;
+    color: #4a3000;
+    margin-bottom: 16px;
+  }
+  .result-card h2 { margin: 0 0 8px; font-size: 22px; }
+  .result-card .big { font-size: 38px; font-weight: 800; }
+  .result-stats {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    margin-top: 12px;
+  }
+  .stat-box {
+    background: rgba(255,255,255,0.3);
+    padding: 8px;
+    border-radius: 8px;
+  }
+  .stat-label { font-size: 11px; }
+  .stat-value { font-size: 18px; font-weight: 700; }
+  /* Champion selection */
+  .champion-pick {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 6px;
+    max-height: 400px;
+    overflow-y: auto;
+    padding: 4px;
+  }
+  .champion-tile {
+    background: #fafafa;
+    border: 2px solid transparent;
+    border-radius: 10px;
+    padding: 8px 4px;
+    text-align: center;
+    cursor: pointer;
+    font-size: 12px;
+  }
+  .champion-tile.active { background: var(--green-light); border-color: var(--green); }
+  .champion-tile .flag { font-size: 22px; display: block; }
+  /* Match simulator */
+  .match-card {
+    background: #fafafa;
+    border-radius: 10px;
+    padding: 12px;
+    margin-bottom: 8px;
+  }
+  .match-teams { display: flex; justify-content: space-between; align-items: center; }
+  .match-team { display: flex; align-items: center; gap: 6px; }
+  .match-score {
+    background: var(--text);
+    color: white;
+    padding: 4px 10px;
+    border-radius: 6px;
+    font-weight: 700;
+    font-size: 16px;
+  }
+  .match-time { font-size: 11px; color: var(--text-light); margin-top: 4px; }
+  /* Bracket */
+  .bracket-scroll { overflow-x: auto; padding-bottom: 8px; }
+  .bracket-round {
+    display: flex;
+    gap: 12px;
+    min-width: max-content;
+  }
+  .bracket-col { display: flex; flex-direction: column; gap: 8px; min-width: 140px; }
+  .bracket-col h4 { font-size: 12px; color: var(--text-light); margin: 0 0 4px; text-align: center; }
+  .bracket-match {
+    background: white;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 6px 8px;
+    font-size: 12px;
+  }
+  .bracket-team { display: flex; justify-content: space-between; padding: 2px 0; }
+  .bracket-team.winner { font-weight: 700; color: var(--green-dark); }
+  /* PK mode */
+  .pk-player-card {
+    background: #fafafa;
+    border-radius: 10px;
+    padding: 10px;
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .pk-leaderboard .pk-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 10px;
+    background: #fafafa;
+    border-radius: 8px;
+    margin-bottom: 6px;
+    font-weight: 600;
+  }
+  .pk-leaderboard .pk-row.gold { background: var(--gold); color: #4a3000; }
+  .pk-leaderboard .pk-row.silver { background: #d7d7d7; }
+  .pk-leaderboard .pk-row.bronze { background: #deb887; }
+  /* Tab nav */
+  .tabbar {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: white;
+    border-top: 1px solid var(--border);
+    display: flex;
+    padding: 8px 0 max(8px, env(safe-area-inset-bottom));
+    z-index: 50;
+  }
+  .tab {
+    flex: 1;
+    text-align: center;
+    padding: 6px 4px;
+    color: var(--text-light);
+    font-size: 11px;
+    cursor: pointer;
+  }
+  .tab.active { color: var(--green); }
+  .tab-emoji { font-size: 22px; display: block; }
+  .content { padding-bottom: 80px; }
+  /* Misc */
+  .hidden { display: none !important; }
+  .text-center { text-align: center; }
+  .mt-8 { margin-top: 8px; } .mt-16 { margin-top: 16px; }
+  .empty-state { text-align: center; padding: 32px 16px; color: var(--text-light); }
+  .badge {
+    display: inline-block;
+    background: var(--green-light);
+    color: var(--green-dark);
+    padding: 2px 8px;
+    border-radius: 10px;
+    font-size: 11px;
+    font-weight: 600;
+  }
+  .shake { animation: shake 0.4s; }
+  @keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-8px); }
+    75% { transform: translateX(8px); }
+  }
+  .bounce { animation: bounce 0.5s; }
+  @keyframes bounce {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.1); }
+  }
+  /* Confetti */
+  .confetti {
+    position: fixed;
+    top: -10px;
+    width: 10px;
+    height: 10px;
+    z-index: 100;
+    pointer-events: none;
+  }
+</style>
+</head>
+<body>
+<div class="app" id="app"></div>
+<div class="tabbar hidden" id="tabbar">
+  <div class="tab active" data-tab="home"><span class="tab-emoji">🏠</span>首页</div>
+  <div class="tab" data-tab="predict"><span class="tab-emoji">🎯</span>预测</div>
+  <div class="tab" data-tab="simulate"><span class="tab-emoji">⚽</span>模拟</div>
+  <div class="tab" data-tab="pk"><span class="tab-emoji">⚔️</span>PK</div>
+</div>
+
+<script>
+// ============= 数据 =============
+const WORLD_CUP = {
+  name: "2026 美加墨世界杯",
+  dates: "06.11 - 07.19",
+  format: "48队 / 12组 / 32强",
+  groups: {
+    A: [{n:"墨西哥",f:"🇲🇽",e:1740,r:14},{n:"南非",f:"🇿🇦",e:1470,r:61},{n:"韩国",f:"🇰🇷",e:1620,r:23},{n:"欧洲附加D",f:"🇪🇺",e:1500,r:0,p:1}],
+    B: [{n:"加拿大",f:"🇨🇦",e:1580,r:27},{n:"欧洲附加A",f:"🇪🇺",e:1500,r:0,p:1},{n:"卡塔尔",f:"🇶🇦",e:1480,r:51},{n:"瑞士",f:"🇨🇭",e:1640,r:19}],
+    C: [{n:"巴西",f:"🇧🇷",e:1830,r:5,s:5},{n:"摩洛哥",f:"🇲🇦",e:1700,r:13},{n:"海地",f:"🇭🇹",e:1340,r:87},{n:"苏格兰",f:"🏴",e:1540,r:38}],
+    D: [{n:"美国",f:"🇺🇸",e:1650,r:16},{n:"巴拉圭",f:"🇵🇾",e:1480,r:53},{n:"澳大利亚",f:"🇦🇺",e:1580,r:26},{n:"欧洲附加C",f:"🇪🇺",e:1500,r:0,p:1}],
+    E: [{n:"德国",f:"🇩🇪",e:1700,r:11,s:4},{n:"库拉索",f:"🇨🇼",e:1320,r:82},{n:"科特迪瓦",f:"🇨🇮",e:1560,r:36},{n:"厄瓜多尔",f:"🇪🇨",e:1620,r:24}],
+    F: [{n:"荷兰",f:"🇳🇱",e:1740,r:7},{n:"日本",f:"🇯🇵",e:1660,r:18},{n:"欧洲附加B",f:"🇪🇺",e:1500,r:0,p:1},{n:"突尼斯",f:"🇹🇳",e:1520,r:41}],
+    G: [{n:"比利时",f:"🇧🇪",e:1720,r:9},{n:"埃及",f:"🇪🇬",e:1560,r:35},{n:"伊朗",f:"🇮🇷",e:1630,r:21},{n:"新西兰",f:"🇳🇿",e:1340,r:86}],
+    H: [{n:"西班牙",f:"🇪🇸",e:1740,r:8,s:1},{n:"佛得角",f:"🇨🇻",e:1420,r:65},{n:"沙特",f:"🇸🇦",e:1460,r:58},{n:"乌拉圭",f:"🇺🇾",e:1700,r:15,s:2}],
+    I: [{n:"法国",f:"🇫🇷",e:1840,r:2,s:2},{n:"塞内加尔",f:"🇸🇳",e:1660,r:17},{n:"附加赛2",f:"🌍",e:1450,r:0,p:1},{n:"挪威",f:"🇳🇴",e:1600,r:30}],
+    J: [{n:"阿根廷",f:"🇦🇷",e:1870,r:1,s:3},{n:"阿尔及利亚",f:"🇩🇿",e:1540,r:37},{n:"奥地利",f:"🇦🇹",e:1600,r:25},{n:"约旦",f:"🇯🇴",e:1420,r:62}],
+    K: [{n:"葡萄牙",f:"🇵🇹",e:1750,r:6},{n:"附加赛1",f:"🌍",e:1450,r:0,p:1},{n:"乌兹别克",f:"🇺🇿",e:1480,r:50},{n:"哥伦比亚",f:"🇨🇴",e:1720,r:12}],
+    L: [{n:"英格兰",f:"🏴",e:1800,r:4,s:1},{n:"克罗地亚",f:"🇭🇷",e:1720,r:10},{n:"加纳",f:"🇬🇭",e:1380,r:71},{n:"巴拿马",f:"🇵🇦",e:1600,r:30}]
+  }
+};
+const GROUP_KEYS = Object.keys(WORLD_CUP.groups);
+
+// ============= 状态 =============
+const state = {
+  view: 'home',
+  player: { name: '洛可', predictions: {}, champion: null },
+  pkPlayers: [],
+  pkCurrent: 0,
+  pkGroupIdx: 0,
+  pkResults: [],
+  simulation: null,
+  currentMatch: null
+};
+
+// ============= 工具 =============
+const $ = (sel) => document.querySelector(sel);
+const $$ = (sel) => document.querySelectorAll(sel);
+const save = () => localStorage.setItem('luoke-cup', JSON.stringify(state.player));
+const load = () => {
+  try {
+    const s = localStorage.getItem('luoke-cup');
+    if (s) Object.assign(state.player, JSON.parse(s));
+  } catch (e) {}
+};
+load();
+
+const rng = (seed) => {
+  let s = seed || Date.now();
+  return () => {
+    s = (s * 9301 + 49297) % 233280;
+    return s / 233280;
+  };
+};
+
+// ELO 比赛概率 + 进球模拟
+const matchProb = (a, b) => 1 / (1 + Math.pow(10, (b - a) / 400));
+const simulateGoals = (rand, eloA, eloB) => {
+  const probA = matchProb(eloA, eloB);
+  const expTotal = 2.4 + (eloA + eloB - 3000) / 600;
+  const lambdaA = expTotal * probA;
+  const lambdaB = expTotal * (1 - probA);
+  const poisson = (L) => {
+    let k = 0, p = 1;
+    do { k++; p *= rand(); } while (p > Math.exp(-L));
+    return k - 1;
+  };
+  return { a: poisson(lambdaA), b: poisson(lambdaB) };
+};
+
+const goalsLabel = (g) => g.a === g.b ? `${g.a}-${g.b} (平)` : (g.a > g.b ? `胜 ${g.a}-${g.b}` : `负 ${g.a}-${g.b}`);
+const winner = (t1, t2, g) => g.a > g.b ? t1 : (g.b > g.a ? t2 : null);
+
+// 初始化小组赛预测
+const initPredictions = () => {
+  if (Object.keys(state.player.predictions).length === 0) {
+    GROUP_KEYS.forEach(g => {
+      state.player.predictions[g] = { first: null, second: null };
+    });
+  }
+};
+initPredictions();
+
+// ============= 视图渲染 =============
+const render = () => {
+  const app = $('#app');
+  app.innerHTML = '';
+  if (state.view === 'home') renderHome(app);
+  else if (state.view === 'predict') renderPredict(app);
+  else if (state.view === 'predict-champion') renderChampion(app);
+  else if (state.view === 'predict-result') renderResult(app);
+  else if (state.view === 'simulate') renderSimulate(app);
+  else if (state.view === 'simulate-running') renderSimulateRunning(app);
+  else if (state.view === 'pk-setup') renderPKSetup(app);
+  else if (state.view === 'pk-play') renderPKPlay(app);
+  else if (state.view === 'pk-result') renderPKResult(app);
+  // Tabbar
+  $('#tabbar').classList.toggle('hidden', ['predict-result','pk-play','pk-result','simulate-running','predict-champion'].includes(state.view));
+  $$('.tab').forEach(t => t.classList.toggle('active', t.dataset.tab === state.view));
+};
+
+const renderHome = (app) => {
+  app.innerHTML = `
+    <div class="header">
+      <span class="trophy">🏆</span>
+      <h1>洛可杯 2026</h1>
+      <div class="subtitle">⚽ 2026 美加墨世界杯 · 06.11-07.19</div>
+    </div>
+    <div class="card">
+      <div class="card-title">👋 玩家信息</div>
+      <input type="text" id="playerName" value="${state.player.name}" placeholder="输入你的名字" maxlength="12" />
+      <div class="text-center" style="margin-top:8px;color:var(--text-light);font-size:12px;">当前：<strong>${state.player.name}</strong> · 洛可加油 ⚽</div>
+    </div>
+    <div class="card">
+      <div class="card-title">🎮 选个玩法</div>
+      <div class="mode-grid">
+        <div class="mode-card" data-mode="predict">
+          <span class="mode-emoji">🎯</span>
+          <div class="mode-name">预测模式</div>
+          <div class="mode-desc">12组+冠军 选你的答案</div>
+        </div>
+        <div class="mode-card" data-mode="simulate">
+          <span class="mode-emoji">⚽</span>
+          <div class="mode-name">模拟整届</div>
+          <div class="mode-desc">AI跑 48→32→冠军</div>
+        </div>
+        <div class="mode-card" data-mode="pk">
+          <span class="mode-emoji">⚔️</span>
+          <div class="mode-name">PK 对战</div>
+          <div class="mode-desc">2-4人 比赛预测准度</div>
+        </div>
+        <div class="mode-card" data-mode="bracket">
+          <span class="mode-emoji">📊</span>
+          <div class="mode-name">赛程对阵</div>
+          <div class="mode-desc">查看 12组 队伍</div>
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">📋 你的预测</div>
+      ${state.player.champion ? `
+        <div>冠军：<span class="badge">${getFlag(state.player.champion)} ${state.player.champion}</span></div>
+        <div class="mt-8" style="font-size:12px;color:var(--text-light);">小组赛预测：${Object.values(state.player.predictions).filter(p => p.first).length} / 12 组完成</div>
+        <button class="btn btn-gold mt-16" id="viewResult">🏆 查看成绩单</button>
+      ` : `
+        <div class="empty-state">还没预测过，去选个玩法开始吧 ⚽</div>
+      `}
+    </div>
+    <div class="card">
+      <div class="card-title">ℹ️ 关于</div>
+      <div style="font-size:12px;color:var(--text-light);line-height:1.6;">
+        洛可杯是给洛可同学专用的世界杯预测游戏 🐾<br>
+        数据基于 2025-12-06 抽签结果 · 48 队 / 12 组<br>
+        v1.0 · 由小零快速搭建 ⚡
+      </div>
+    </div>
+  `;
+  $('#playerName').addEventListener('change', e => { state.player.name = e.target.value || '洛可'; save(); });
+  $$('.mode-card').forEach(c => {
+    c.addEventListener('click', () => {
+      const m = c.dataset.mode;
+      if (m === 'predict') state.view = 'predict';
+      else if (m === 'simulate') { state.view = 'simulate'; state.simulation = null; }
+      else if (m === 'pk') { state.view = 'pk-setup'; state.pkPlayers = []; }
+      else if (m === 'bracket') renderBracket();
+      render();
+    });
+  });
+  if (state.player.champion) $('#viewResult').addEventListener('click', () => { state.view = 'predict-result'; render(); });
+};
+
+const getFlag = (teamName) => {
+  for (const g of Object.values(WORLD_CUP.groups)) {
+    const t = g.find(x => x.n === teamName);
+    if (t) return t.f;
+  }
+  return '🏳️';
+};
+
+const renderPredict = (app) => {
+  const total = GROUP_KEYS.length;
+  const done = GROUP_KEYS.filter(g => state.player.predictions[g].first && state.player.predictions[g].second).length;
+  const pct = Math.round(done / total * 100);
+  app.innerHTML = `
+    <div class="header">
+      <h1>🎯 小组赛预测</h1>
+      <div class="subtitle">选每组冠军（🥇）+ 亚军（🥈）</div>
+    </div>
+    <div class="progress-wrap">
+      <div class="progress-text">${state.player.name} 已完成 ${done}/${total} 组 (${pct}%)</div>
+      <div class="progress-bar"><div class="progress-fill" style="width:${pct}%"></div></div>
+    </div>
+    <div id="groups"></div>
+    <div class="card">
+      <div class="card-title">🏆 选冠军（48选1）</div>
+      <button class="btn btn-gold" id="goChampion">${state.player.champion ? `当前：${getFlag(state.player.champion)} ${state.player.champion}` : '去选冠军'}</button>
+    </div>
+    <div class="card">
+      <button class="btn btn-outline" id="resetPredict">🔄 重置所有预测</button>
+    </div>
+  `;
+  const groupsEl = $('#groups');
+  GROUP_KEYS.forEach(gk => {
+    const teams = WORLD_CUP.groups[gk];
+    const pred = state.player.predictions[gk];
+    groupsEl.insertAdjacentHTML('beforeend', `
+      <div class="card group-section">
+        <div class="group-header">${gk} 组</div>
+        ${teams.map(t => {
+          const isFirst = pred.first === t.n;
+          const isSecond = pred.second === t.n;
+          return `
+            <div class="team-row ${isFirst ? 'selected' : ''} ${isSecond ? 'runner-up' : ''}" data-group="${gk}" data-team="${t.n}">
+              <span class="team-flag">${t.f}</span>
+              <div class="team-info">
+                <div class="team-name">${t.n} ${t.s ? '⭐'.repeat(t.s) : ''} ${isFirst ? '<span class="position-tag tag-1st">🥇 冠军</span>' : ''} ${isSecond ? '<span class="position-tag tag-2nd">🥈 亚军</span>' : ''}</div>
+                <div class="team-meta">FIFA 排名 ${t.r || '-'} · ELO ${t.e} · ${t.p ? '附加赛待定' : '已晋级'}</div>
+              </div>
+            </div>
+          `;
+        }).join('')}
+      </div>
+    `);
+  });
+  // Team click
+  $$('.team-row').forEach(row => {
+    row.addEventListener('click', () => {
+      const g = row.dataset.group;
+      const t = row.dataset.team;
+      const p = state.player.predictions[g];
+      if (!p.first) { p.first = t; }
+      else if (p.first === t) { p.first = p.second; p.second = null; }
+      else if (!p.second) { if (p.first !== t) p.second = t; }
+      else if (p.second === t) { p.second = null; }
+      else { p.first = p.second; p.second = t; }
+      save();
+      render();
+    });
+  });
+  $('#goChampion').addEventListener('click', () => { state.view = 'predict-champion'; render(); });
+  $('#resetPredict').addEventListener('click', () => {
+    if (confirm('确定要清空所有预测吗？')) {
+      state.player.predictions = {};
+      state.player.champion = null;
+      initPredictions();
+      save();
+      render();
+    }
+  });
+};
+
+const renderChampion = (app) => {
+  const allTeams = [];
+  Object.entries(WORLD_CUP.groups).forEach(([gk, teams]) => {
+    teams.forEach(t => { if (!t.p) allTeams.push({ ...t, group: gk }); });
+  });
+  allTeams.sort((a, b) => a.e - b.e);
+  app.innerHTML = `
+    <div class="header">
+      <h1>🏆 选冠军</h1>
+      <div class="subtitle">48 队里挑一个 · 押注你的答案</div>
+    </div>
+    <div class="card">
+      <div class="champion-pick" id="championPick">
+        ${allTeams.map(t => `
+          <div class="champion-tile ${state.player.champion === t.n ? 'active' : ''}" data-team="${t.n}">
+            <span class="flag">${t.f}</span>
+            ${t.n}
+          </div>
+        `).join('')}
+      </div>
+    </div>
+    <div class="card">
+      <button class="btn" id="saveChampion" ${!state.player.champion ? 'disabled' : ''}>${state.player.champion ? `✅ 选好了：${getFlag(state.player.champion)} ${state.player.champion}` : '先选一个队'}</button>
+      <button class="btn btn-outline mt-8" id="backPredict">← 返回</button>
+    </div>
+  `;
+  $$('.champion-tile').forEach(t => {
+    t.addEventListener('click', () => {
+      state.player.champion = t.dataset.team;
+      save();
+      render();
+    });
+  });
+  $('#saveChampion').addEventListener('click', () => { state.view = 'predict-result'; render(); });
+  $('#backPredict').addEventListener('click', () => { state.view = 'predict'; render(); });
+};
+
+const renderResult = (app) => {
+  const allDone = GROUP_KEYS.every(g => state.player.predictions[g].first && state.player.predictions[g].second);
+  app.innerHTML = `
+    <div class="header">
+      <h1>🏆 洛可的成绩单</h1>
+      <div class="subtitle">${state.player.name} 的 2026 预测</div>
+    </div>
+    <div class="result-card">
+      <h2>${state.player.name} 心中的冠军</h2>
+      <div class="big">${state.player.champion ? `${getFlag(state.player.champion)} ${state.player.champion}` : '还没选'}</div>
+      <div class="result-stats">
+        <div class="stat-box">
+          <div class="stat-label">小组赛预测</div>
+          <div class="stat-value">${Object.values(state.player.predictions).filter(p => p.first).length}/12</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-label">冠军已选</div>
+          <div class="stat-value">${state.player.champion ? '✅' : '❌'}</div>
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">📋 小组赛预测</div>
+      ${GROUP_KEYS.map(gk => {
+        const p = state.player.predictions[gk];
+        return `
+          <div style="padding:8px 0;border-bottom:1px solid var(--border);">
+            <strong style="color:var(--gold-dark);">${gk}组</strong>
+            <div style="margin-top:4px;font-size:14px;">
+              🥇 ${p.first ? `${getFlag(p.first)} ${p.first}` : '<span style="color:#999;">未选</span>'}
+              &nbsp;&nbsp;
+              🥈 ${p.second ? `${getFlag(p.second)} ${p.second}` : '<span style="color:#999;">未选</span>'}
+            </div>
+          </div>
+        `;
+      }).join('')}
+    </div>
+    <div class="card">
+      <button class="btn" id="editPredict">✏️ 修改预测</button>
+      <button class="btn btn-gold mt-8" id="shareResult" ${!allDone || !state.player.champion ? 'disabled' : ''}>🎉 复制战绩（分享给爸妈）</button>
+      <button class="btn btn-outline mt-8" id="goHome">← 回首页</button>
+    </div>
+    <div class="card">
+      <div class="card-title">💡 洛可的预测点评</div>
+      <div style="font-size:13px;line-height:1.7;color:var(--text);">
+        ${predictComment()}
+      </div>
+    </div>
+  `;
+  $('#editPredict').addEventListener('click', () => { state.view = 'predict'; render(); });
+  $('#shareResult').addEventListener('click', () => {
+    const text = `🏆 洛可杯预测 - ${state.player.name}\n\n冠军：${getFlag(state.player.champion)} ${state.player.champion}\n\n小组赛预测：\n${GROUP_KEYS.map(gk => {
+      const p = state.player.predictions[gk];
+      return `${gk}组：🥇${p.first || '?'} / 🥈${p.second || '?'}`;
+    }).join('\n')}\n\n快来洛可杯一起玩！`;
+    navigator.clipboard.writeText(text).then(() => alert('已复制到剪贴板 📋'));
+  });
+  $('#goHome').addEventListener('click', () => { state.view = 'home'; render(); });
+};
+
+const predictComment = () => {
+  const c = state.player.champion;
+  if (!c) return '还没选冠军呢，去选一个吧 ⚽';
+  const tier1 = ['阿根廷','法国','巴西','英格兰','西班牙','葡萄牙'];
+  const tier2 = ['德国','荷兰','比利时','意大利','乌拉圭','哥伦比亚'];
+  if (tier1.includes(c)) return `选了 <strong>${getFlag(c)} ${c}</strong>，眼光不错！FIFA 排名前列，夺冠热门 🏆`;
+  if (tier2.includes(c)) return `选了 <strong>${getFlag(c)} ${c}</strong>，劲旅之一！有机会爆冷 ⚡`;
+  if (c.includes('日本') || c.includes('韩国') || c.includes('摩洛哥')) return `选了 <strong>${getFlag(c)} ${c}</strong>，支持亚洲/非洲代表！上届摩洛哥可是四强 🌟`;
+  return `选了 <strong>${getFlag(c)} ${c}</strong>，真球迷啊，押宝黑马的勇气 👏`;
+};
+
+// ============= 模拟模式 =============
+const renderSimulate = (app) => {
+  app.innerHTML = `
+    <div class="header">
+      <h1>⚽ 模拟整届世界杯</h1>
+      <div class="subtitle">AI 根据 ELO 评分跑完整赛程</div>
+    </div>
+    <div class="card">
+      <div class="card-title">🎮 选择你的主队</div>
+      <div style="font-size:12px;color:var(--text-light);margin-bottom:8px;">主队比赛你可以参与决策（进攻/防守）</div>
+      <div class="champion-pick" id="myTeamPick">
+        ${Object.entries(WORLD_CUP.groups).flatMap(([gk, teams]) => teams.filter(t => !t.p).map(t => `
+          <div class="champion-tile" data-team="${t.n}">
+            <span class="flag">${t.f}</span>
+            ${t.n}
+          </div>
+        `)).join('')}
+      </div>
+    </div>
+    <div class="card">
+      <button class="btn btn-gold" id="startSim" disabled>⚽ 开始模拟</button>
+    </div>
+  `;
+  let myTeam = null;
+  $$('#myTeamPick .champion-tile').forEach(t => {
+    t.addEventListener('click', () => {
+      $$('#myTeamPick .champion-tile').forEach(x => x.classList.remove('active'));
+      t.classList.add('active');
+      myTeam = t.dataset.team;
+      $('#startSim').disabled = false;
+    });
+  });
+  $('#startSim').addEventListener('click', () => {
+    runSimulation(myTeam);
+  });
+};
+
+const runSimulation = (myTeam) => {
+  const rand = rng(20260611);
+  const groups = JSON.parse(JSON.stringify(WORLD_CUP.groups));
+  // 模拟所有小组赛
+  const groupResults = {};
+  const matches = [];
+  Object.entries(groups).forEach(([gk, teams]) => {
+    const m = [];
+    for (let i = 0; i < 4; i++) {
+      for (let j = i+1; j < 4; j++) {
+        const g = simulateGoals(rand, teams[i].e, teams[j].e);
+        m.push({ a: teams[i], b: teams[j], goals: g });
+        matches.push({ group: gk, stage: 'group', home: teams[i], away: teams[j], goals: g });
+      }
+    }
+    // 积分
+    const tbl = teams.map(t => ({ ...t, pts: 0, gf: 0, ga: 0, gd: 0, w: 0, d: 0, l: 0 }));
+    m.forEach(({ a, b, goals }) => {
+      const ta = tbl.find(x => x.n === a.n);
+      const tb = tbl.find(x => x.n === b.n);
+      ta.gf += goals.a; ta.ga += goals.b;
+      tb.gf += goals.b; tb.ga += goals.a;
+      ta.gd = ta.gf - ta.ga; tb.gd = tb.gf - tb.ga;
+      if (goals.a > goals.b) { ta.pts += 3; ta.w++; tb.l++; }
+      else if (goals.b > goals.a) { tb.pts += 3; tb.w++; ta.l++; }
+      else { ta.pts++; tb.pts++; ta.d++; tb.d++; }
+    });
+    tbl.sort((x, y) => y.pts - x.pts || y.gd - x.gd || y.gf - x.gf);
+    groupResults[gk] = { table: tbl, matches: m };
+  });
+  // 32强：12组前2 + 8个最好第3
+  const thirdPlace = Object.entries(groupResults).map(([gk, r]) => ({ gk, team: r.table[2] }))
+    .sort((a, b) => b.team.pts - a.team.pts || b.team.gd - a.team.gd || b.team.gf - a.team.gf);
+  const qualified = thirdPlace.slice(0, 8).map(x => x.team.n);
+  // 简化：1/8决赛对阵（实际对阵复杂，简化为按组别）
+  const r32 = [];
+  GROUP_KEYS.forEach((gk, idx) => {
+    const first = groupResults[gk].table[0];
+    const second = groupResults[gk].table[1];
+    if (idx % 2 === 0 && idx + 1 < GROUP_KEYS.length) {
+      const nextFirst = groupResults[GROUP_KEYS[idx+1]].table[0];
+      r32.push({ a: first, b: nextFirst, stage: 'R32' });
+      r32.push({ a: second, b: qualified[idx % qualified.length], stage: 'R32' });
+    }
+  });
+  // 模拟淘汰赛
+  const koResults = [];
+  let current = r32;
+  const stages = ['R32', 'R16', 'QF', 'SF', 'F'];
+  stages.forEach(stage => {
+    const winners = [];
+    current.forEach(({ a, b }) => {
+      const probA = matchProb(a.e, b.e);
+      const goals = simulateGoals(rand, a.e, b.e);
+      // 90分钟平局走概率
+      let w;
+      if (goals.a > goals.b) w = a;
+      else if (goals.b > goals.a) w = b;
+      else w = rand() < probA ? a : b;
+      const match = { a, b, goals, winner: w, stage };
+      koResults.push(match);
+      winners.push(w);
+    });
+    if (winners.length === 1) {
+      state.simulation = { groupResults, koResults, champion: winners[0], runnerUp: current[0].a === winners[0] ? current[0].b : current[0].a, myTeam };
+      state.view = 'simulate-running';
+      render();
+      return;
+    }
+    current = [];
+    for (let i = 0; i < winners.length; i += 2) {
+      current.push({ a: winners[i], b: winners[i+1] });
+    }
+  });
+};
+
+const renderSimulateRunning = (app) => {
+  const sim = state.simulation;
+  const myTeamIn = sim.koResults.some(m => m.a.n === sim.myTeam || m.b.n === sim.myTeam);
+  app.innerHTML = `
+    <div class="header">
+      <h1>🏆 模拟结果</h1>
+      <div class="subtitle">${sim.myTeam} 的世界杯之旅</div>
+    </div>
+    <div class="result-card bounce">
+      <h2>${state.player.name} 的主队</h2>
+      <div class="big">${getFlag(sim.myTeam)} ${sim.myTeam}</div>
+      <div style="margin-top:8px;font-size:14px;">本届成绩：<strong>${myTeamIn ? (sim.champion.n === sim.myTeam ? '🏆 冠军！' : '晋级淘汰赛') : '小组未出线'}</strong></div>
+    </div>
+    <div class="result-card">
+      <h2>最终冠军</h2>
+      <div class="big">${getFlag(sim.champion.n)} ${sim.champion.n}</div>
+      <div style="margin-top:8px;font-size:13px;">亚军：${getFlag(sim.runnerUp.n)} ${sim.runnerUp.n}</div>
+    </div>
+    <div class="card">
+      <div class="card-title">📊 小组赛积分榜</div>
+      ${Object.entries(sim.groupResults).map(([gk, r]) => `
+        <div style="margin-bottom:10px;">
+          <strong style="color:var(--gold-dark);">${gk}组</strong>
+          <div style="font-size:12px;margin-top:4px;">
+            ${r.table.map((t, i) => `<div style="padding:3px 0;${t.n === sim.myTeam ? 'background:var(--green-light);border-radius:4px;padding:3px 6px;' : ''}">${i+1}. ${t.f} ${t.n} - ${t.pts}分 (${t.gf}-${t.ga})</div>`).join('')}
+          </div>
+        </div>
+      `).join('')}
+    </div>
+    <div class="card">
+      <div class="card-title">⚔️ 淘汰赛</div>
+      ${sim.koResults.map(m => `
+        <div class="match-card">
+          <div class="match-teams">
+            <div class="match-team"><span style="font-size:20px">${m.a.f}</span> ${m.a.n}</div>
+            <div class="match-score">${m.goals.a} - ${m.goals.b}</div>
+            <div class="match-team">${m.b.n} <span style="font-size:20px">${m.b.f}</span></div>
+          </div>
+          <div class="match-time">晋级：<strong>${m.winner.f} ${m.winner.n}</strong></div>
+        </div>
+      `).join('')}
+    </div>
+    <div class="card">
+      <button class="btn" id="resim">🔄 再跑一次</button>
+      <button class="btn btn-outline mt-8" id="goHome">← 回首页</button>
+    </div>
+  `;
+  $('#resim').addEventListener('click', () => runSimulation(sim.myTeam));
+  $('#goHome').addEventListener('click', () => { state.view = 'home'; render(); });
+};
+
+// ============= PK 模式 =============
+const renderPKSetup = (app) => {
+  app.innerHTML = `
+    <div class="header">
+      <h1>⚔️ PK 对战</h1>
+      <div class="subtitle">2-4 人轮流预测，看谁最准</div>
+    </div>
+    <div class="card">
+      <div class="card-title">👥 添加玩家</div>
+      <input type="text" id="pkName" placeholder="玩家名字" maxlength="10" />
+      <div class="btn-row mt-8">
+        <button class="btn btn-sm" id="addPK">+ 添加</button>
+        <button class="btn btn-sm btn-outline" id="clearPK">清空</button>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">📋 当前玩家 (${state.pkPlayers.length}/4)</div>
+      ${state.pkPlayers.length === 0 ? '<div class="empty-state">添加 2-4 个玩家开始</div>' : state.pkPlayers.map((p, i) => `
+        <div class="pk-player-card">
+          <div>${i+1}. <strong>${p}</strong></div>
+          <button class="btn-sm" data-rm="${i}" style="background:var(--red);color:white;border:none;padding:4px 10px;border-radius:6px;cursor:pointer;">×</button>
+        </div>
+      `).join('')}
+      <button class="btn btn-gold mt-16" id="startPK" ${state.pkPlayers.length < 2 ? 'disabled' : ''}>⚔️ 开始 PK</button>
+    </div>
+    <div class="card">
+      <button class="btn btn-outline" id="goHome">← 回首页</button>
+    </div>
+  `;
+  $('#addPK').addEventListener('click', () => {
+    const name = $('#pkName').value.trim();
+    if (!name) { alert('请输入名字'); return; }
+    if (state.pkPlayers.length >= 4) { alert('最多4个玩家'); return; }
+    if (state.pkPlayers.includes(name)) { alert('名字重复'); return; }
+    state.pkPlayers.push(name);
+    $('#pkName').value = '';
+    render();
+  });
+  $('#clearPK').addEventListener('click', () => { state.pkPlayers = []; render(); });
+  $$('[data-rm]').forEach(b => b.addEventListener('click', () => { state.pkPlayers.splice(+b.dataset.rm, 1); render(); }));
+  $('#startPK').addEventListener('click', () => {
+    state.pkResults = state.pkPlayers.map(n => ({ name: n, picks: {}, champion: null, score: 0 }));
+    state.pkCurrent = 0;
+    state.pkGroupIdx = 0;
+    state.view = 'pk-play';
+    render();
+  });
+  $('#goHome').addEventListener('click', () => { state.view = 'home'; render(); });
+};
+
+const renderPKPlay = (app) => {
+  const player = state.pkResults[state.pkCurrent];
+  const gk = GROUP_KEYS[state.pkGroupIdx];
+  const teams = WORLD_CUP.groups[gk];
+  const picks = player.picks[gk] || { first: null, second: null };
+  app.innerHTML = `
+    <div class="progress-wrap">
+      <div class="progress-text">${player.name} · 第 ${state.pkCurrent+1}/${state.pkResults.length} 位 · 进度 ${state.pkGroupIdx+1}/12 组</div>
+      <div class="progress-bar"><div class="progress-fill" style="width:${(state.pkGroupIdx+1)/12*100}%"></div></div>
+    </div>
+    <div class="card">
+      <div class="card-title">${player.name} 选 ${gk} 组</div>
+      <div style="font-size:12px;color:var(--text-light);margin-bottom:8px;">点击 2 次 = 选冠军+亚军</div>
+      ${teams.map(t => {
+        const isFirst = picks.first === t.n;
+        const isSecond = picks.second === t.n;
+        return `
+          <div class="team-row ${isFirst ? 'selected' : ''} ${isSecond ? 'runner-up' : ''}" data-team="${t.n}">
+            <span class="team-flag">${t.f}</span>
+            <div class="team-info">
+              <div class="team-name">${t.n} ${isFirst ? '<span class="position-tag tag-1st">🥇</span>' : ''} ${isSecond ? '<span class="position-tag tag-2nd">🥈</span>' : ''}</div>
+            </div>
+          </div>
+        `;
+      }).join('')}
+    </div>
+    <div class="card">
+      <button class="btn" id="pkNext" ${(!picks.first || !picks.second) ? 'disabled' : ''}>${state.pkGroupIdx < 11 ? '下一组 →' : '选冠军 →'}</button>
+    </div>
+  `;
+  $$('.team-row').forEach(row => {
+    row.addEventListener('click', () => {
+      const t = row.dataset.team;
+      if (!player.picks[gk]) player.picks[gk] = { first: null, second: null };
+      const p = player.picks[gk];
+      if (!p.first) p.first = t;
+      else if (p.first === t) { p.first = p.second; p.second = null; }
+      else if (!p.second) p.second = t;
+      else if (p.second === t) p.second = null;
+      else { p.first = p.second; p.second = t; }
+      render();
+    });
+  });
+  $('#pkNext').addEventListener('click', () => {
+    if (state.pkGroupIdx < 11) {
+      state.pkGroupIdx++;
+      render();
+    } else {
+      // 去选冠军
+      const allTeams = [];
+      Object.entries(WORLD_CUP.groups).forEach(([gk2, ts]) => {
+        ts.forEach(t => { if (!t.p) allTeams.push({ ...t, group: gk2 }); });
+      });
+      app.innerHTML = `
+        <div class="header"><h1>🏆 ${player.name} 选冠军</h1></div>
+        <div class="card">
+          <div class="champion-pick" id="pkChamp">
+            ${allTeams.map(t => `
+              <div class="champion-tile ${player.champion === t.n ? 'active' : ''}" data-team="${t.n}">
+                <span class="flag">${t.f}</span>${t.n}
+              </div>
+            `).join('')}
+          </div>
+        </div>
+        <div class="card">
+          <button class="btn btn-gold" id="pkSaveChamp" ${!player.champion ? 'disabled' : ''}>${player.champion ? '✅ ' + player.champion : '先选一个'}</button>
+        </div>
+      `;
+      $$('.champion-tile').forEach(c => c.addEventListener('click', () => { player.champion = c.dataset.team; render(); }));
+      $('#pkSaveChamp').addEventListener('click', () => {
+        state.pkCurrent++;
+        state.pkGroupIdx = 0;
+        if (state.pkCurrent >= state.pkResults.length) {
+          // 计算积分（基于ELO预测冠军）
+          state.pkResults.forEach(p => {
+            // 简化积分：冠军选热门+10，否则按ELO差距给分
+            if (p.champion) {
+              const team = Object.values(WORLD_CUP.groups).flat().find(t => t.n === p.champion);
+              p.score = team ? Math.round((team.e - 1400) / 50) : 0;
+            }
+          });
+          state.view = 'pk-result';
+        }
+        render();
+      });
+    }
+  });
+};
+
+const renderPKResult = (app) => {
+  const sorted = [...state.pkResults].sort((a, b) => b.score - a.score);
+  app.innerHTML = `
+    <div class="header">
+      <h1>🏆 PK 排行榜</h1>
+      <div class="subtitle">谁的世界杯眼光最准？</div>
+    </div>
+    <div class="result-card bounce">
+      <h2>🥇 冠军：${sorted[0].name}</h2>
+      <div class="big">${sorted[0].champion ? getFlag(sorted[0].champion) + ' ' + sorted[0].champion : '?'}</div>
+      <div class="result-stats">
+        <div class="stat-box"><div class="stat-label">综合分</div><div class="stat-value">${sorted[0].score}</div></div>
+        <div class="stat-box"><div class="stat-label">预测组数</div><div class="stat-value">12/12</div></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">📊 完整排行</div>
+      <div class="pk-leaderboard">
+        ${sorted.map((p, i) => `
+          <div class="pk-row ${i === 0 ? 'gold' : i === 1 ? 'silver' : i === 2 ? 'bronze' : ''}">
+            <span>${['🥇','🥈','🥉','4️⃣'][i]} ${p.name}</span>
+            <span>${p.champion ? getFlag(p.champion) + ' ' + p.champion : '未选'} · ${p.score}分</span>
+          </div>
+        `).join('')}
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">💡 评选规则</div>
+      <div style="font-size:12px;color:var(--text-light);line-height:1.6;">
+        冠军选择是 PK 关键，热门球队 ELO 高得分高。等世界杯 6.11 开赛，预测准度一决高下 ⚽
+      </div>
+    </div>
+    <div class="card">
+      <button class="btn" id="pkAgain">🔄 再来一轮</button>
+      <button class="btn btn-outline mt-8" id="goHome">← 回首页</button>
+    </div>
+  `;
+  $('#pkAgain').addEventListener('click', () => { state.view = 'pk-setup'; render(); });
+  $('#goHome').addEventListener('click', () => { state.view = 'home'; render(); });
+};
+
+// ============= 赛程对阵 =============
+const renderBracket = () => {
+  const groups = WORLD_CUP.groups;
+  let text = `🏆 2026 世界杯 · 48 队 / 12 组\n\n`;
+  GROUP_KEYS.forEach(gk => {
+    text += `${gk}组：${groups[gk].map(t => t.f + t.n).join(' · ')}\n`;
+  });
+  alert(text);
+};
+
+// ============= 初始化 =============
+$$('.tab').forEach(t => t.addEventListener('click', () => {
+  state.view = t.dataset.tab;
+  if (t.dataset.tab === 'simulate' && !state.simulation) state.view = 'simulate';
+  if (t.dataset.tab === 'pk') { state.view = 'pk-setup'; state.pkPlayers = []; }
+  render();
+}));
+
+render();
+</script>
+</body>
+</html>
