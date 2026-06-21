@@ -346,8 +346,8 @@ const startQuickMatch = () => {
 const initPlayers = () => {
   const myT = TEAMS[state.selectedTeam];
   const opT = TEAMS[state.opponent];
-  const mySpeed = (myT.speed + 100) / 100;
-  const opSpeed = (opT.speed + 100) / 100;
+  const mySpeed = myT.speed / 100; // 0.6-0.9
+  const opSpeed = opT.speed / 100;
   const diffSpeed = state.difficulty === 'easy' ? 0.8 : state.difficulty === 'medium' ? 1.0 : 1.2;
   // 我方 5 球员：1 守门员 + 4 队友；AI 5 球员：1 守门 + 4 进攻
   const myPositions = [
