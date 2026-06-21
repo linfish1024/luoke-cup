@@ -416,10 +416,10 @@ const onJoyEnd = () => { joystickActive = false; joystickDX = 0; joystickDY = 0;
 
 const initActions = () => {
   $('#btnShoot').addEventListener('touchstart', e => { e.preventDefault(); shoot(); });
-  $('#btnPass').addEventListener('touchstart', e => { e.preventDefault(); pass(); });
+  $('#btnPass').addEventListener('touchstart', e => { e.preventDefault(); passBall(); });
   $('#btnSprint').addEventListener('touchstart', e => { e.preventDefault(); sprint(); });
   $('#btnShoot').addEventListener('mousedown', shoot);
-  $('#btnPass').addEventListener('mousedown', pass);
+  $('#btnPass').addEventListener('mousedown', passBall);
   $('#btnSprint').addEventListener('mousedown', sprint);
 };
 
